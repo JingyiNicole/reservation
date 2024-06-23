@@ -1,1 +1,4 @@
-
+venv
+.gitignore
+launch.json
+app.cpython-311.pyc

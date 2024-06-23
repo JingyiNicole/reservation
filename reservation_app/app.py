@@ -19,7 +19,6 @@ class Reservation(db.Model):
 
 # Dummy users for demonstration purposes
 users = {
-    'customer': 'customer123',
     'admin': 'admin123'
 }
 
@@ -44,13 +43,10 @@ def login():
         if username in users and users[username] == password:
             session['logged_in'] = True
             session['username'] = username
-            if username == 'admin':
-                return redirect(url_for('admin'))
-            else:
-                return redirect(url_for('index'))
+            return redirect(url_for('admin'))
         else:
-            return redirect(url_for('index'))
-
+            flash('Invalid credentials, please try again.')
+            return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/logout')
@@ -59,18 +55,12 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/index')
-@login_required
-def index():
-    if session['username'] == 'admin':
-        return redirect(url_for('admin'))
-    return render_template('index.html')
+@app.route('/customer')
+def customer():
+    return render_template('customer.html')
 
 @app.route('/book', methods=['POST'])
-@login_required
 def book():
-    if session['username'] == 'admin':
-        return redirect(url_for('admin'))
     name = request.form['name']
     email = request.form['email']
     date = request.form['date']
@@ -85,22 +75,17 @@ def book():
     return redirect(url_for('confirmation', name=name))
 
 @app.route('/confirmation')
-@login_required
 def confirmation():
-    if session['username'] == 'admin':
-        return redirect(url_for('admin'))
     name = request.args.get('name')
     return render_template('confirmation.html', name=name)
 
 @app.route('/admin')
 @login_required
 def admin():
-    if session['username'] != 'admin':
-        return redirect(url_for('index'))
     reservations = Reservation.query.all()
     return render_template('admin.html', reservations=reservations)
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
