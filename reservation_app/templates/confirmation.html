@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation</title>
+    <title>Reservation Confirmation</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     {% include 'navbar.html' %}
     <div class="container">
-        <h1>Reservation Confirmed!</h1>
-        <p>Reservation confirmed for {{ name }}!</p>
-        <a href="/" class="button">Return to Reservation Form</a>
+        <h1>Reservation Confirmed</h1>
+        <p>Thank you, {{ name }}. Your reservation has been confirmed.</p>
+        <a href="{{ url_for('customer') }}">Book another reservation</a>
     </div>
 </body>
 </html>

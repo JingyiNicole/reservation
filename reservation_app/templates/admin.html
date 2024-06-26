@@ -3,18 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - All Reservations</title>
+    <title>Admin - Reservations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     {% include 'navbar.html' %}
     <div class="container">
-        <h1>All Reservations</h1>
-        <ul id="reservations-list">
+        <h1>Reservations</h1>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Date and Time</th>
+                <th>Number of Guests</th>
+            </tr>
             {% for reservation in reservations %}
-            <li>{{ reservation.name }} - {{ reservation.email }} - {{ reservation.date }} - {{ reservation.time }} - {{ reservation.guests }} guests</li>
+            <tr>
+                <td>{{ reservation[0] }}</td>
+                <td>{{ reservation[1] }}</td>
+                <td>{{ reservation[2] }}</td>
+                <td>{{ reservation[3] }}</td>
+            </tr>
             {% endfor %}
-        </ul>
+        </table>
     </div>
 </body>
 </html>
