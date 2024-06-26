@@ -10,7 +10,7 @@
     {% include 'navbar.html' %}
     <div class="container">
         <h1>Book a Reservation</h1>
-        <form action="/book" method="post" class="reservation-form">
+        <form id="reservationForm">
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required><br><br>
             
@@ -23,8 +23,34 @@
             <label for="guests">Number of Guests:</label>
             <input type="number" id="guests" name="guests" required><br><br>
             
-            <input type="submit" value="Book">
+            <button type="button" onclick="submitForm()">Book</button>
         </form>
     </div>
+    <script>
+        async function submitForm() {
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                datetime: document.getElementById('datetime').value,
+                guests: document.getElementById('guests').value
+            };
+
+            const response = await fetch('/book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Reservation successful!');
+                window.location.href = `/confirmation?name=${formData.name}`;
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        }
+    </script>
 </body>
 </html>

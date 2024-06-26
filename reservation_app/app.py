@@ -24,7 +24,7 @@ credentials = service_account.Credentials.from_service_account_file(
 service = build('sheets', 'v4', credentials=credentials)
 
 # The ID and range of your Google Sheet
-SPREADSHEET_ID = 'your_spreadsheet_id'
+SPREADSHEET_ID = '1ElTbBg6Zj-gOU-sBjaFMx7I_qEIhDKCFeSdr2i2H7bQ'
 RANGE_NAME = 'Sheet1!A:D'  # Adjust the range as needed
 
 @app.route('/')
@@ -52,28 +52,46 @@ def logout():
 
 @app.route('/book', methods=['POST'])
 def book():
-    data = request.get_json()
-    name = data.get('name')
-    email = data.get('email')
-    datetime = data.get('datetime')
-    guests = data.get('guests')
+    if request.is_json:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        datetime = data.get('datetime')
+        guests = data.get('guests')
 
-    # Append the reservation to Google Sheets
-    values = [[name, email, datetime, guests]]
-    body = {'values': values}
-    service.spreadsheets().values().append(
-        spreadsheetId=SPREADSHEET_ID,
-        range=RANGE_NAME,
-        valueInputOption='RAW',
-        body=body
-    ).execute()
+        # Append the reservation to Google Sheets
+        values = [[name, email, datetime, guests]]
+        body = {'values': values}
+        service.spreadsheets().values().append(
+            spreadsheetId=SPREADSHEET_ID,
+            range=RANGE_NAME,
+            valueInputOption='RAW',
+            body=body
+        ).execute()
 
-    return jsonify({'message': 'Reservation successful!'})
+        return jsonify({'message': 'Reservation successful!'})
+    else:
+        return jsonify({'error': 'Unsupported Media Type'}), 415
 
 @app.route('/confirmation')
 def confirmation():
     name = request.args.get('name')
-    return render_template('confirmation.html', name=name)
+    # Fetch reservation details from Google Sheets for confirmation
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID,
+        range=RANGE_NAME
+    ).execute()
+    reservations = result.get('values', [])
+
+    for reservation in reservations:
+        if reservation[0] == name:
+            email = reservation[1]
+            datetime = reservation[2]
+            guests = reservation[3]
+            date, time = datetime.split('T')
+            return render_template('confirmation.html', name=name, date=date, time=time, guests=guests)
+
+    return jsonify({'error': 'Reservation not found'}), 404
 
 @app.route('/admin')
 def admin():
