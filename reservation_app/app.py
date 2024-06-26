@@ -1,12 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import gdown
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
 
-# Path to your service account key file
-SERVICE_ACCOUNT_FILE = '/Users/panjingyi/Documents/GitHub/reservation/reservation-427619-eb480d1a778c.json'
+# URL to the service account file on Google Drive
+SERVICE_ACCOUNT_FILE_URL = 'https://drive.google.com/uc?id=15F-9MqWTR-Dq8kr0WPaxkoTWGJd19hsh'
+
+# Path to save the downloaded service account file
+SERVICE_ACCOUNT_FILE = '/tmp/service_account.json'
+
+# Download the service account file
+if not os.path.exists(SERVICE_ACCOUNT_FILE):
+    gdown.download(SERVICE_ACCOUNT_FILE_URL, SERVICE_ACCOUNT_FILE, quiet=False)
 
 # Google Sheets API setup
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -15,7 +24,7 @@ credentials = service_account.Credentials.from_service_account_file(
 service = build('sheets', 'v4', credentials=credentials)
 
 # The ID and range of your Google Sheet
-SPREADSHEET_ID = '1ElTbBg6Zj-gOU-sBjaFMx7I_qEIhDKCFeSdr2i2H7bQ'
+SPREADSHEET_ID = 'your_spreadsheet_id'
 RANGE_NAME = 'Sheet1!A:D'  # Adjust the range as needed
 
 @app.route('/')
@@ -43,10 +52,11 @@ def logout():
 
 @app.route('/book', methods=['POST'])
 def book():
-    name = request.form['name']
-    email = request.form['email']
-    datetime = request.form['datetime']
-    guests = request.form['guests']
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    datetime = data.get('datetime')
+    guests = data.get('guests')
 
     # Append the reservation to Google Sheets
     values = [[name, email, datetime, guests]]
@@ -58,7 +68,7 @@ def book():
         body=body
     ).execute()
 
-    return redirect(url_for('confirmation', name=name))
+    return jsonify({'message': 'Reservation successful!'})
 
 @app.route('/confirmation')
 def confirmation():
