@@ -1,10 +1,13 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask_cors import CORS
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import gdown
 
 app = Flask(__name__)
+CORS(app, resources={r"/book": {"origins": "*"}})  # Enable CORS for /book endpoint
+
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
 
 # URL to the service account file on Google Drive
